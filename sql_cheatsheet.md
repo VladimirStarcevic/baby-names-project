@@ -266,6 +266,44 @@ SELECT * FROM names;
 
 ---
 
+## Sorting and Limiting Results
+
+**What it does:** Controls how many results you see (`LIMIT`), where to start from (`OFFSET`), and in what order (`ORDER BY`).
+
+```sql
+-- Limit number of results (get the first 10 rows)
+SELECT * FROM names LIMIT 10;
+
+-- Sort results (ascending by default)
+SELECT * FROM names ORDER BY year ASC;
+
+-- Sort results (descending)
+SELECT * FROM names ORDER BY count DESC;
+
+-- Sort by multiple columns (first by year, then by count within each year)
+SELECT * FROM names ORDER BY year DESC, count DESC;
+
+-- Skip the first N results using OFFSET
+-- This query skips the top 10 most popular names and shows the next ones.
+SELECT * FROM names ORDER BY count DESC OFFSET 10;
+
+-- ### Combining LIMIT and OFFSET (Pagination) ###
+-- This is the key for showing results page by page.
+
+-- Get the #1 ranked name (skip 0, take 1)
+SELECT * FROM names ORDER BY count DESC LIMIT 1 OFFSET 0;
+
+-- Get the #2 ranked name (skip 1, take 1)
+SELECT * FROM names ORDER BY count DESC LIMIT 1 OFFSET 1;
+
+-- Get the #10 ranked name (skip 9, take 1)
+SELECT * FROM names ORDER BY count DESC LIMIT 1 OFFSET 9;
+
+-- Get page 3 of results, with 20 items per page
+-- (Page 1 = OFFSET 0, Page 2 = OFFSET 20, Page 3 = OFFSET 40)
+SELECT * FROM names ORDER BY year LIMIT 20 OFFSET 40;
+
+
 ## Quick Reference Summary
 
 | Command | Purpose | Example |
