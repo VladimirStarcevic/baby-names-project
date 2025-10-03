@@ -2,32 +2,54 @@ import sqlite3
 import csv
 import os
 
-file_data = "data"
-file_name = "example-small.csv"
-file_path = os.path.join(file_data, file_name)
+DB_FILENAME = 'babynames.db'
+DATA_FOLDER = 'data'
 
 
-conn = sqlite3.connect('babynames.db')
+def extract_year_from_filename(file_in: str) -> int:
+    return int(file_in[3:-4])
+
+conn = sqlite3.connect(DB_FILENAME)
 cursor = conn.cursor()
 
-print("Delete old data....")
+
+print("Deleting old data from data base 'names'...")
 cursor.execute("DELETE FROM names;")
-print("Old data deleted!")
+print("Old data successfully deleted.")
+
 
 try:
 
-    with open(file_path,encoding='UTF-8') as f_in:
+    list_of_filenames = os.listdir(DATA_FOLDER)
+    print(f"Found {len(list_of_filenames)} files in folder '{DATA_FOLDER}'.")
 
-        csv_reader = csv.reader(f_in)
+    for filename in list_of_filenames:
 
-        for row in csv_reader:
-            sql_command = "INSERT INTO names (name, gender, count, year) VALUES (?, ?, ?, ?)"
-            cursor.execute(sql_command, (row[0], row[1], row[2], 2023))
+
+        if filename.startswith('yob') and filename.endswith('.csv'):
+
+            print(f"Processing file: {filename}...")
+
+            full_path = os.path.join(DATA_FOLDER, filename)
+            year = extract_year_from_filename(filename)
+
+            with open(full_path, 'r', encoding='UTF-8') as f_in:
+                csv_reader = csv.reader(f_in)
+
+
+                for row in csv_reader:
+                    sql_command = "INSERT INTO names (name, gender, count, year) VALUES (?, ?, ?, ?)"
+                    cursor.execute(sql_command, (row[0], row[1], row[2], year))
 
 except FileNotFoundError:
-    print(f"File  {file_name} not found")
+    print(f"ERROR: The folder '{DATA_FOLDER}' was not found.")
 except Exception as e:
     print(f"An unexpected error occurred: {e}")
 
+print("Committing transactions to the database...")
 conn.commit()
+print("Transactions successfully saved.")
+
 conn.close()
+
+print("Process finished.")
